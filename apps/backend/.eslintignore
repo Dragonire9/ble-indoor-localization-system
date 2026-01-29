@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Testing
+coverage/
+.nyc_output/
+
+# Generated files
+*.min.js
+*.min.ts
+
+# Prisma generated client
+prisma/generated/

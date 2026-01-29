@@ -1,0 +1,238 @@
+openapi: 3.0.0
+info:
+  title: Geofence Management API
+  description: API endpoints for managing geofence polygons
+  version: 1.0.0
+
+paths:
+  /api/geofences:
+    get:
+      summary: List all geofences
+      description: Retrieve all geofences with optional filtering
+      parameters:
+        - name: sectorId
+          in: query
+          schema:
+            type: string
+          description: Filter geofences by sector ID
+        - name: beaconId
+          in: query
+          schema:
+            type: string
+          description: Filter geofences associated with a specific beacon
+      responses:
+        '200':
+          description: List of geofences
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Geofence'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    post:
+      summary: Create a new geofence
+      description: Create a new geofence polygon with coordinates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGeofenceRequest'
+      responses:
+        '201':
+          description: Geofence created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Geofence'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/geofences/{geofenceId}:
+    get:
+      summary: Get geofence by ID
+      description: Retrieve a specific geofence by its ID
+      parameters:
+        - name: geofenceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Geofence details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Geofence'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    put:
+      summary: Update geofence
+      description: Update geofence polygon coordinates or metadata
+      parameters:
+        - name: geofenceId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGeofenceRequest'
+      responses:
+        '200':
+          description: Geofence updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Geofence'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    delete:
+      summary: Delete geofence
+      description: Remove a geofence from the system
+      parameters:
+        - name: geofenceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Geofence deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+components:
+  schemas:
+    Geofence:
+      type: object
+      required:
+        - id
+        - sectorId
+        - coordinates
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+        sectorId:
+          type: string
+        name:
+          type: string
+          nullable: true
+        coordinates:
+          type: array
+          items:
+            $ref: '#/components/schemas/CoordinatePoint'
+          description: Array of coordinate points forming polygon (first and last must be identical)
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+          nullable: true
+
+    CoordinatePoint:
+      type: object
+      required:
+        - x
+        - y
+      properties:
+        x:
+          type: number
+          description: X coordinate in meters (local coordinate system)
+        y:
+          type: number
+          description: Y coordinate in meters (local coordinate system)
+
+    CreateGeofenceRequest:
+      type: object
+      required:
+        - sectorId
+        - coordinates
+      properties:
+        sectorId:
+          type: string
+        name:
+          type: string
+          nullable: true
+        coordinates:
+          type: array
+          items:
+            $ref: '#/components/schemas/CoordinatePoint'
+          minItems: 3
+        metadata:
+          type: object
+          nullable: true
+
+    UpdateGeofenceRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+        coordinates:
+          type: array
+          items:
+            $ref: '#/components/schemas/CoordinatePoint'
+          minItems: 3
+        metadata:
+          type: object
+          nullable: true
+
+  responses:
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+
+    ServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string

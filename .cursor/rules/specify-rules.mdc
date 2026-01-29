@@ -1,0 +1,30 @@
+# BLE Development Guidelines
+
+Auto-generated from all feature plans. Last updated: 2026-01-20
+
+## Active Technologies
+
+- Node.js 18+ (LTS) with TypeScript 5.0+ (strict mode enabled) + Express.js (HTTP API), MQTT.js (MQTT client), Socket.io (WebSocket), Prisma (ORM), Zod (validation), Winston (logging) (001-beacon-backend)
+
+## Project Structure
+
+```text
+backend/
+frontend/
+tests/
+```
+
+## Commands
+
+npm test; npm run lint
+
+## Code Style
+
+Node.js 18+ (LTS) with TypeScript 5.0+ (strict mode enabled): Follow standard conventions
+
+## Recent Changes
+
+- 001-beacon-backend: Added Node.js 18+ (LTS) with TypeScript 5.0+ (strict mode enabled) + Express.js (HTTP API), MQTT.js (MQTT client), Socket.io (WebSocket), Prisma (ORM), Zod (validation), Winston (logging)
+
+<!-- MANUAL ADDITIONS START -->
+<!-- MANUAL ADDITIONS END -->

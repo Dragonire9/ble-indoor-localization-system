@@ -1,0 +1,320 @@
+openapi: 3.0.0
+info:
+  title: Beacon Management API
+  description: API endpoints for managing BLE beacons
+  version: 1.0.0
+
+paths:
+  /api/beacons:
+    get:
+      summary: List all beacons
+      description: Retrieve all beacons with optional filtering by sector or connection state
+      parameters:
+        - name: sectorId
+          in: query
+          schema:
+            type: string
+          description: Filter beacons by sector ID
+        - name: connectionState
+          in: query
+          schema:
+            type: string
+            enum: [ONLINE, OFFLINE]
+          description: Filter beacons by connection state
+      responses:
+        '200':
+          description: List of beacons
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Beacon'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    post:
+      summary: Register a new beacon
+      description: Create a new beacon record in the system
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBeaconRequest'
+      responses:
+        '201':
+          description: Beacon created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Beacon'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/beacons/{beaconId}:
+    get:
+      summary: Get beacon by ID
+      description: Retrieve a specific beacon by its unique ID
+      parameters:
+        - name: beaconId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Beacon details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Beacon'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    put:
+      summary: Update beacon
+      description: Update beacon configuration (sector, geofence, etc.)
+      parameters:
+        - name: beaconId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBeaconRequest'
+      responses:
+        '200':
+          description: Beacon updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Beacon'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    delete:
+      summary: Delete beacon
+      description: Remove a beacon from the system
+      parameters:
+        - name: beaconId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Beacon deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/beacons/{beaconId}/telemetry:
+    get:
+      summary: Get beacon telemetry history
+      description: Retrieve historical telemetry data for a specific beacon
+      parameters:
+        - name: beaconId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Start date for telemetry query
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: End date for telemetry query
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+          description: Maximum number of records to return
+      responses:
+        '200':
+          description: List of telemetry records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BeaconTelemetry'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+components:
+  schemas:
+    Beacon:
+      type: object
+      required:
+        - id
+        - sectorId
+        - powerState
+        - connectionState
+        - lastSeenAt
+        - registeredAt
+      properties:
+        id:
+          type: string
+          description: Unique beacon identifier
+        sectorId:
+          type: string
+          description: Sector ID this beacon belongs to
+        geofenceId:
+          type: string
+          nullable: true
+          description: Associated geofence ID
+        powerState:
+          type: string
+          enum: [ON, OFF, LOW_BATTERY]
+        connectionState:
+          type: string
+          enum: [ONLINE, OFFLINE]
+        lastSeenAt:
+          type: string
+          format: date-time
+        registeredAt:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+          nullable: true
+
+    CreateBeaconRequest:
+      type: object
+      required:
+        - id
+        - sectorId
+      properties:
+        id:
+          type: string
+        sectorId:
+          type: string
+        geofenceId:
+          type: string
+          nullable: true
+        powerState:
+          type: string
+          enum: [ON, OFF, LOW_BATTERY]
+          default: ON
+        metadata:
+          type: object
+          nullable: true
+
+    UpdateBeaconRequest:
+      type: object
+      properties:
+        sectorId:
+          type: string
+        geofenceId:
+          type: string
+          nullable: true
+        powerState:
+          type: string
+          enum: [ON, OFF, LOW_BATTERY]
+        metadata:
+          type: object
+          nullable: true
+
+    BeaconTelemetry:
+      type: object
+      required:
+        - id
+        - beaconId
+        - timestamp
+      properties:
+        id:
+          type: string
+        beaconId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        rssi:
+          type: number
+          nullable: true
+        batteryLevel:
+          type: number
+          nullable: true
+          minimum: 0
+          maximum: 100
+        powerState:
+          type: string
+          enum: [ON, OFF, LOW_BATTERY]
+          nullable: true
+        transmissionPower:
+          type: number
+          nullable: true
+        zoneFlags:
+          type: array
+          items:
+            type: string
+          nullable: true
+        roleFlags:
+          type: array
+          items:
+            type: string
+          nullable: true
+        message:
+          type: string
+          nullable: true
+        rawData:
+          type: object
+          nullable: true
+
+  responses:
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+
+    ServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string

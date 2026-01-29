@@ -1,0 +1,148 @@
+{
+  "sectors": [
+    {
+      "sectorId": "sector-001",
+      "name": "Main Building - Floor 1",
+      "description": "First floor of the main building",
+      "metadata": {
+        "building": "Main Building",
+        "floor": 1
+      }
+    },
+    {
+      "sectorId": "sector-002",
+      "name": "Main Building - Floor 2",
+      "description": "Second floor of the main building",
+      "metadata": {
+        "building": "Main Building",
+        "floor": 2
+      }
+    }
+  ],
+  "beacons": [
+    {
+      "beaconId": "beacon-001",
+      "sectorId": "sector-001",
+      "geofenceId": null,
+      "powerState": "ON",
+      "connectionState": "ONLINE",
+      "mqttUsername": "beacon-001",
+      "metadata": {
+        "location": "Entrance",
+        "room": "Lobby"
+      }
+    },
+    {
+      "beaconId": "beacon-002",
+      "sectorId": "sector-001",
+      "geofenceId": null,
+      "powerState": "ON",
+      "connectionState": "OFFLINE",
+      "mqttUsername": "beacon-002",
+      "metadata": {
+        "location": "Hallway",
+        "room": "Corridor A"
+      }
+    },
+    {
+      "beaconId": "beacon-003",
+      "sectorId": "sector-002",
+      "geofenceId": null,
+      "powerState": "ON",
+      "connectionState": "ONLINE",
+      "mqttUsername": "beacon-003",
+      "metadata": {
+        "location": "Office Area",
+        "room": "Room 201"
+      }
+    }
+  ],
+  "geofences": [
+    {
+      "sectorId": "sector-001",
+      "name": "Lobby Area",
+      "coordinates": [
+        { "x": 0, "y": 0 },
+        { "x": 10, "y": 0 },
+        { "x": 10, "y": 10 },
+        { "x": 0, "y": 10 },
+        { "x": 0, "y": 0 }
+      ],
+      "metadata": {
+        "type": "room",
+        "description": "Main lobby entrance area"
+      }
+    },
+    {
+      "sectorId": "sector-001",
+      "name": "Hallway Section",
+      "coordinates": [
+        { "x": 10, "y": 0 },
+        { "x": 20, "y": 0 },
+        { "x": 20, "y": 5 },
+        { "x": 10, "y": 5 },
+        { "x": 10, "y": 0 }
+      ],
+      "metadata": {
+        "type": "corridor",
+        "description": "Main hallway section"
+      }
+    },
+    {
+      "sectorId": "sector-002",
+      "name": "Office Zone",
+      "coordinates": [
+        { "x": 0, "y": 0 },
+        { "x": 15, "y": 0 },
+        { "x": 15, "y": 12 },
+        { "x": 0, "y": 12 },
+        { "x": 0, "y": 0 }
+      ],
+      "metadata": {
+        "type": "office",
+        "description": "Office workspace area"
+      }
+    }
+  ],
+  "telemetry": [
+    {
+      "beaconId": "beacon-001",
+      "rssi": -45.5,
+      "batteryLevel": 85.0,
+      "powerState": "ON",
+      "transmissionPower": 0.0,
+      "zoneFlags": ["zone1", "zone2"],
+      "roleFlags": ["anchor"],
+      "message": "Heartbeat",
+      "rawData": {
+        "timestamp": "2025-01-27T10:00:00Z"
+      }
+    },
+    {
+      "beaconId": "beacon-001",
+      "rssi": -47.2,
+      "batteryLevel": 84.8,
+      "powerState": "ON",
+      "transmissionPower": 0.0,
+      "zoneFlags": ["zone1"],
+      "roleFlags": ["anchor"],
+      "message": "Heartbeat",
+      "rawData": {
+        "timestamp": "2025-01-27T10:05:00Z"
+      }
+    },
+    {
+      "beaconId": "beacon-003",
+      "rssi": -52.1,
+      "batteryLevel": 92.5,
+      "powerState": "ON",
+      "transmissionPower": 0.0,
+      "zoneFlags": ["zone3"],
+      "roleFlags": ["anchor"],
+      "message": "Heartbeat",
+      "rawData": {
+        "timestamp": "2025-01-27T10:00:00Z"
+      }
+    }
+  ]
+}

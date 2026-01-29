@@ -1,0 +1,161 @@
+// Prisma schema for BLE Beacon Backend System
+// MongoDB with explicit ObjectId mapping
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Sector {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  sectorId    String   @unique
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  metadata    Json?
+
+  beacons   Beacon[]
+  geofences Geofence[]
+
+  @@index([name])
+  @@map("sectors")
+}
+
+model Beacon {
+  id              String          @id @default(auto()) @map("_id") @db.ObjectId
+  beaconId        String          @unique
+  sectorId        String
+  geofenceId      String?         @db.ObjectId
+  powerState      PowerState      @default(ON)
+  connectionState ConnectionState @default(OFFLINE)
+  lastSeenAt      DateTime        @default(now())
+  registeredAt    DateTime        @default(now())
+  mqttUsername    String?
+  metadata        Json?
+
+  sector    Sector            @relation(fields: [sectorId], references: [sectorId])
+  geofence  Geofence?         @relation(fields: [geofenceId], references: [id])
+  telemetry BeaconTelemetry[]
+
+  @@index([sectorId])
+  @@index([connectionState])
+  @@index([geofenceId])
+  @@index([sectorId, connectionState])
+  @@map("beacons")
+}
+
+model BeaconTelemetry {
+  id                String      @id @default(auto()) @map("_id") @db.ObjectId
+  beaconId          String
+  timestamp         DateTime    @default(now())
+  rssi              Float?
+  batteryLevel      Float?
+  powerState        PowerState?
+  transmissionPower Float?
+  zoneFlags         String[]
+  roleFlags         String[]
+  message           String?
+  rawData           Json?
+
+  beacon Beacon @relation(fields: [beaconId], references: [beaconId])
+
+  @@index([beaconId])
+  @@index([timestamp(sort: Desc)])
+  @@index([beaconId, timestamp(sort: Desc)])
+  @@map("beacon_telemetry")
+}
+
+model Geofence {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  sectorId    String
+  name        String?
+  coordinates Json // Array of {x: number, y: number} points
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  metadata    Json?
+
+  sector  Sector   @relation(fields: [sectorId], references: [sectorId])
+  beacons Beacon[]
+
+  @@index([sectorId])
+  @@map("geofences")
+}
+
+enum PowerState {
+  ON
+  OFF
+  LOW_BATTERY
+}
+
+enum ConnectionState {
+  ONLINE
+  OFFLINE
+}
+
+model User {
+  id            String    @id @map("_id")
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @map("_id")
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @map("_id")
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @map("_id")
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
