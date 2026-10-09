@@ -1,5 +1,7 @@
 # BLE Indoor Localization System
 
+[![Powered by RustChain](https://img.shields.io/badge/Powered%20by-RustChain-orange)](https://rustchain.org)
+
 A monorepo for a BLE (Bluetooth Low Energy) beacon-based indoor localization and monitoring system. The system receives telemetry data from ESP32 beacons via MQTT, stores data in MongoDB, and provides a real-time monitoring dashboard.
 
 ## 🏗️ Architecture
